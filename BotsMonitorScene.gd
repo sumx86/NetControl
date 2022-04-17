@@ -1,6 +1,9 @@
 extends Node2D
 
+var file_utils = preload("res://FileUtils.gd")
+
 export(PackedScene) var arp_bot
+export(PackedScene) var bots_section
 var server
 var client
 var bytes
@@ -10,10 +13,16 @@ var packets_sent = 1
 var received_data = ""
 var arp_pid
 
-var bot_x_offset = -120
-var bot_y_offset = 0
+var initial_bot_x_offset = -120
+var initial_bot_y_offset = 40
+var bot_x_offset = initial_bot_x_offset
+var bot_y_offset = initial_bot_y_offset
 var bot_x_step = 75
 var bot_y_step = 75
+var bots_per_row = 10
+var bots_row_count = 0
+var current_row = 1
+var total_sections = 0
 
 var hosts = []
 var white_list = []
@@ -28,8 +37,21 @@ func _ready():
 	if self.server.listen(self.SERVER_PORT, self.SERVER_IP) == 0:
 		print("Server started on port " + str(self.SERVER_PORT) + " with ip address " + str(self.SERVER_IP) + "!")
 		self.set_process(true)
-	self.initialize_white_list()
-	self.run_arp(["arp.py", "--bcast"])
+		self.initialize_white_list()
+		self.add_new_section(self.total_sections)
+		#self.run_arp(["arp.py", "--bcast"])
+
+func add_new_section(id):
+	var section = self.bots_section.instance().set_id(id)
+	$MonitorLayer.add_child(section)
+	section.add_to_group("bots_sections")
+	self.total_sections += 1
+
+func get_section_by_id(id):
+	for section in get_tree().get_nodes_in_group("bots_sections"):
+		if section.get_id() == id:
+			return section
+	return null
 
 func run_arp(options):
 	self.arp_pid = OS.execute("python", options, false)
@@ -50,10 +72,10 @@ func handle_received_data():
 		$MonitorLayer/PacketsSent.text = "Packets sent " + str(self.packets_sent)
 		if self.packets_sent == self.total_packets:
 			$MonitorLayer/Status.text = "Done!"
-			OS.kill(self.arp_pid)
+			#OS.kill(self.arp_pid)
 	else:
 		self.add_host(self.received_data)
-		print(self.hosts)
+		#print(self.hosts)
 	
 func add_host(data):
 	var host = {"ipaddr":data[0], "hwaddr":data[1], "trusted":false}
@@ -67,28 +89,25 @@ func add_host(data):
 		self.hosts.append(host)
 		$MonitorLayer/BotsSection.add_child(self.arp_bot.instance().set_data(host, Vector2(self.bot_x_offset, self.bot_y_offset)))
 		self.bot_x_offset += self.bot_x_step
+		self.bots_row_count += 1
+		if self.bots_row_count == self.bots_per_row:
+			self.bots_row_count = 0
+			self.bot_x_offset = self.initial_bot_x_offset
+			self.bot_y_offset += self.bot_y_step
+			self.current_row += 1
+		
+		if self.current_row > 3:
+			self.current_row = 1
+			self.bot_y_offset = self.initial_bot_y_offset
 
 func has_host(host):
 	for entry in self.hosts:
-		if entry['ipaddr'] == host['ipaddr'] and\
-		   entry['hwaddr'] == host['hwaddr']:
+		if entry['ipaddr'] == host['ipaddr'] and entry['hwaddr'] == host['hwaddr']:
 			return true
 	return false
 
-func load_file(fname):
-	var file = File.new()
-	var error = file.open(fname, File.READ)
-	if error != OK:
-		print("Error opening file -> ", error)
-		return null
-	
-	if file.get_len() <= 0:
-		print("File " + fname + " is empty!")
-		return null
-	return file
-
 func initialize_white_list():
-	var file = self.load_file(WHITE_LIST_FILE)
+	var file = file_utils.load_file(WHITE_LIST_FILE)
 	if file != null:
 		while not file.eof_reached():
 			var entry = file.get_line().strip_edges()
