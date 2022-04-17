@@ -1,9 +1,10 @@
-[gd_scene load_steps=8 format=2]
+[gd_scene load_steps=9 format=2]
 
 [ext_resource path="res://redmonitor.png" type="Texture" id=1]
 [ext_resource path="res://BotsSection.tscn" type="PackedScene" id=2]
 [ext_resource path="res://BotsMonitorScene.gd" type="Script" id=3]
 [ext_resource path="res://ArpBot.tscn" type="PackedScene" id=4]
+[ext_resource path="res://SectionManager.tscn" type="PackedScene" id=5]
 
 [sub_resource type="DynamicFontData" id=2]
 font_path = "res://Fonts/NeoTech-Ea8y9.ttf"
@@ -20,6 +21,8 @@ font_data = SubResource( 2 )
 script = ExtResource( 3 )
 arp_bot = ExtResource( 4 )
 bots_section = ExtResource( 2 )
+
+[node name="SectionManager" parent="." instance=ExtResource( 5 )]
 
 [node name="MonitorLayer" type="CanvasLayer" parent="."]
 

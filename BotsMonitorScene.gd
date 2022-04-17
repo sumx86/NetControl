@@ -1,9 +1,10 @@
 extends Node2D
 
-var file_utils = preload("res://FileUtils.gd")
-
 export(PackedScene) var arp_bot
 export(PackedScene) var bots_section
+onready var section_manager = self.get_node("SectionManager")
+
+var file_utils = preload("res://FileUtils.gd")
 var server
 var client
 var bytes
@@ -25,8 +26,6 @@ var current_row = 1
 
 # SECTION DATA
 var current_section_id = 0
-var total_sections = 0
-var current_section = null
 
 var hosts = []
 var white_list = []
@@ -42,20 +41,8 @@ func _ready():
 		print("Server started on port " + str(self.SERVER_PORT) + " with ip address " + str(self.SERVER_IP) + "!")
 		self.set_process(true)
 		self.initialize_white_list()
-		self.add_new_section(self.total_sections)
+		self.section_manager.add_new_section(self.bots_section.instance(), $MonitorLayer)
 		#self.run_arp(["arp.py", "--bcast"])
-
-func add_new_section(id):
-	self.current_section = self.bots_section.instance().set_id(id)
-	$MonitorLayer.add_child(self.current_section)
-	self.current_section.add_to_group("bots_sections")
-	self.total_sections += 1
-
-func get_section_by_id(id):
-	for section in get_tree().get_nodes_in_group("bots_sections"):
-		if section.get_id() == id:
-			return section
-	return null
 
 func run_arp(options):
 	self.arp_pid = OS.execute("python", options, false)
