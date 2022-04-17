@@ -1,0 +1,75 @@
+[gd_scene load_steps=14 format=2]
+
+[ext_resource path="res://Player.gd" type="Script" id=1]
+[ext_resource path="res://Player/up/profw0.png" type="Texture" id=2]
+[ext_resource path="res://Player/right/profd0.png" type="Texture" id=3]
+[ext_resource path="res://Player/up/profw2.png" type="Texture" id=4]
+[ext_resource path="res://Player/up/profw1.png" type="Texture" id=5]
+[ext_resource path="res://Player/down/profs0.png" type="Texture" id=6]
+[ext_resource path="res://Player/right/profd1.png" type="Texture" id=7]
+[ext_resource path="res://Player/down/profs1.png" type="Texture" id=8]
+[ext_resource path="res://Player/down/profs2.png" type="Texture" id=9]
+[ext_resource path="res://Player/right/profd2.png" type="Texture" id=10]
+[ext_resource path="res://Music/footstep1.wav" type="AudioStream" id=11]
+
+[sub_resource type="SpriteFrames" id=1]
+animations = [ {
+"frames": [ ExtResource( 5 ), ExtResource( 2 ), ExtResource( 4 ), ExtResource( 2 ) ],
+"loop": true,
+"name": "up",
+"speed": 6.0
+}, {
+"frames": [ ExtResource( 8 ), ExtResource( 6 ), ExtResource( 9 ), ExtResource( 6 ) ],
+"loop": true,
+"name": "down",
+"speed": 6.0
+}, {
+"frames": [ ExtResource( 7 ), ExtResource( 3 ), ExtResource( 10 ), ExtResource( 3 ) ],
+"loop": true,
+"name": "walkx",
+"speed": 6.0
+} ]
+
+[sub_resource type="RectangleShape2D" id=2]
+extents = Vector2( 29.5, 28.5 )
+
+[node name="Player" type="KinematicBody2D"]
+script = ExtResource( 1 )
+step_sound = true
+
+[node name="AnimatedSprite" type="AnimatedSprite" parent="."]
+frames = SubResource( 1 )
+animation = "walkx"
+frame = 2
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource( 2 )
+__meta__ = {
+"_edit_group_": true
+}
+
+[node name="MachineRayCast2D1" type="RayCast2D" parent="."]
+cast_to = Vector2( 0, 23 )
+collision_mask = 2
+collide_with_areas = true
+collide_with_bodies = false
+
+[node name="MachineRayCast2D2" type="RayCast2D" parent="."]
+position = Vector2( 0, -17 )
+cast_to = Vector2( 0, 23 )
+collision_mask = 2
+collide_with_areas = true
+collide_with_bodies = false
+
+[node name="WallRayCast" type="RayCast2D" parent="."]
+cast_to = Vector2( 0, 23 )
+
+[node name="Camera2D" type="Camera2D" parent="."]
+drag_margin_h_enabled = true
+drag_margin_v_enabled = true
+smoothing_speed = 10.0
+drag_margin_left = 0.3
+drag_margin_bottom = 0.1
+
+[node name="Footsteps" type="AudioStreamPlayer" parent="."]
+stream = ExtResource( 11 )
