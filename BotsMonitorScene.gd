@@ -78,9 +78,10 @@ func add_host(data):
 
 	if not self.has_host(host):
 		self.hosts.append(host)
-		self.current_section.add_child(self.arp_bot.instance().set_data(host, Vector2(self.bot_x_offset, self.bot_y_offset)))
+		self.section_manager.current_section.add_child(self.arp_bot.instance().set_data(host, Vector2(self.bot_x_offset, self.bot_y_offset)))
 		self.bot_x_offset += self.bot_x_step
 		self.bots_row_count += 1
+		
 		if self.bots_row_count == self.bots_per_row:
 			self.bots_row_count = 0
 			self.bot_x_offset = self.initial_bot_x_offset
@@ -90,6 +91,7 @@ func add_host(data):
 		if self.current_row > 3:
 			self.current_row = 1
 			self.bot_y_offset = self.initial_bot_y_offset
+			self.section_manager.add_new_section(self.bots_section.instance(), $MonitorLayer)
 
 func has_host(host):
 	for entry in self.hosts:
