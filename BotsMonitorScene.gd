@@ -22,7 +22,11 @@ var bot_y_step = 75
 var bots_per_row = 10
 var bots_row_count = 0
 var current_row = 1
+
+# SECTION DATA
+var current_section_id = 0
 var total_sections = 0
+var current_section = null
 
 var hosts = []
 var white_list = []
@@ -42,9 +46,9 @@ func _ready():
 		#self.run_arp(["arp.py", "--bcast"])
 
 func add_new_section(id):
-	var section = self.bots_section.instance().set_id(id)
-	$MonitorLayer.add_child(section)
-	section.add_to_group("bots_sections")
+	self.current_section = self.bots_section.instance().set_id(id)
+	$MonitorLayer.add_child(self.current_section)
+	self.current_section.add_to_group("bots_sections")
 	self.total_sections += 1
 
 func get_section_by_id(id):
@@ -87,7 +91,7 @@ func add_host(data):
 
 	if not self.has_host(host):
 		self.hosts.append(host)
-		$MonitorLayer/BotsSection.add_child(self.arp_bot.instance().set_data(host, Vector2(self.bot_x_offset, self.bot_y_offset)))
+		self.current_section.add_child(self.arp_bot.instance().set_data(host, Vector2(self.bot_x_offset, self.bot_y_offset)))
 		self.bot_x_offset += self.bot_x_step
 		self.bots_row_count += 1
 		if self.bots_row_count == self.bots_per_row:
