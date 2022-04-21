@@ -24,9 +24,6 @@ var bots_per_row = 10
 var bots_row_count = 0
 var current_row = 1
 
-# SECTION DATA
-var current_section_id = 0
-
 var hosts = []
 var white_list = []
 var white_list_initialized: bool = false
