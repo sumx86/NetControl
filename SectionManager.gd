@@ -2,6 +2,7 @@ extends Node
 
 var current_section = null
 var total_sections = 0
+var bots_per_section = 30
 
 func _ready():
 	pass
@@ -17,3 +18,7 @@ func get_section_by_id(id):
 		if section.get_id() == id:
 			return section
 	return null
+
+func add_navigation_button():
+	self.total_sections
+	pass
