@@ -14,13 +14,13 @@ var packets_sent = 1
 var received_data = ""
 var arp_pid
 
-var initial_bot_x_offset = -120
+var initial_bot_x_offset = -220
 var initial_bot_y_offset = 40
 var bot_x_offset = initial_bot_x_offset
 var bot_y_offset = initial_bot_y_offset
-var bot_x_step = 75
-var bot_y_step = 75
-var bots_per_row = 10
+var bot_x_step = 260
+var bot_y_step = 250
+var bots_per_row = 4
 var bots_row_count = 0
 var current_row = 1
 
@@ -39,7 +39,9 @@ func _ready():
 		self.set_process(true)
 		self.initialize_white_list()
 		self.section_manager.add_new_section(self.bots_section.instance(), $MonitorLayer)
-		#self.run_arp(["arp.py", "--bcast"])
+		self.run_arp(["arp.py", "--bcast"])
+	else:
+		print("Error: Server could not start!")
 
 func run_arp(options):
 	self.arp_pid = OS.execute("python", options, false)
@@ -55,6 +57,7 @@ func _process(delta):
 
 func handle_received_data():
 	self.received_data = self.client.get_string(self.bytes).split(" - ", false, 0)
+	print(self.received_data)
 	if self.received_data[0] == "Packet":
 		self.packets_sent = int(self.received_data[1])
 		$MonitorLayer/PacketsSent.text = "Packets sent " + str(self.packets_sent)
@@ -63,16 +66,21 @@ func handle_received_data():
 			#OS.kill(self.arp_pid)
 	else:
 		self.add_host(self.received_data)
+		#print(OS.get_window_size())
 		#print(self.hosts)
 	
 func add_host(data):
-	var host = {"ipaddr":data[0], "hwaddr":data[1], "trusted":false}
+	var hwaddr_data = data[1].split("+", false, 0)
+	var hwaddr  = hwaddr_data[0]
+	var dv_name = hwaddr_data[1]
+	
+	var host = {"ipaddr":data[0], "hwaddr":hwaddr, "dv_name":dv_name, "trusted":false}
 	if self.white_list_initialized:
 		for entry in self.white_list:
 			var _entry = entry.split("-", false, 0)
 			if _entry[0] == host["ipaddr"] and _entry[1] == host["hwaddr"]:
 				host['trusted'] = true
-
+	
 	if not self.has_host(host):
 		self.hosts.append(host)
 		self.section_manager.current_section.add_child(self.arp_bot.instance().set_data(host, Vector2(self.bot_x_offset, self.bot_y_offset)))
@@ -100,7 +108,7 @@ func has_host(host):
 	return false
 
 func initialize_white_list():
-	var file = file_utils.load_file(WHITE_LIST_FILE)
+	var file = self.load_file(WHITE_LIST_FILE)
 	if file != null:
 		while not file.eof_reached():
 			var entry = file.get_line().strip_edges()
@@ -108,3 +116,17 @@ func initialize_white_list():
 				self.white_list.append(entry)
 				if not self.white_list_initialized:
 					self.white_list_initialized = true
+	else:
+		print("Error: Could not open file `white-list.txt`")
+
+func load_file(fname):
+	var file = File.new()
+	var error = file.open(fname, File.READ)
+	if error != OK:
+		print("Error opening file -> ", error)
+		return null
+	
+	if file.get_len() <= 0:
+		print("File " + fname + " is empty!")
+		return null
+	return file

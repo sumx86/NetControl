@@ -67,10 +67,15 @@ def send_packet(packet):
 def receive_arp(packet):
     if packet[ARP].op == ARP_REPLY:
         if "0.0.0.0" in packet.pdst or LOCAL_IP_ADDRESS in packet.pdst:
-            src_ip = packet.psrc
-            src_hw = packet.hwsrc
+            src_ip  = packet.psrc
+            src_hw  = packet.hwsrc
+            dv_name = "No-hostname"
+            try:
+                dv_name = socket.gethostbyaddr(src_ip)[0]
+            except:
+                print("")
             mutex.acquire()
-            send_tcp_data(src_ip + " - " + src_hw)
+            send_tcp_data(src_ip + " - " + src_hw + "+" + dv_name)
             mutex.release()
 
 def receiver():

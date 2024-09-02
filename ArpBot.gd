@@ -3,8 +3,9 @@ extends Area2D
 var _data = {}
 var gateway_data = {"ip":"192.168.0.1", "hw":"aa:aa:aa:aa:aa:aa"}
 var command_options = ["arp.py", "--spoof"]
-var good_bot = preload("res://Bots/goodbot.png")
-var evil_bot = preload("res://Bots/evilbot.png")
+var good_bot = preload("res://Bots/Spider Bot White.png")
+var evil_bot = preload("res://Bots/Spider Bot Red.png")
+var bot_text = ""
 
 onready var main = self.get_parent()
 onready var player = main.get_node("Player")
@@ -16,10 +17,18 @@ func set_data(data, _position: Vector2):
 	self._data = data
 	self.position = _position
 	if not self._data["trusted"]:
-		$Sprite.set_texture(self.evil_bot)
+		self.create_bot_with_label(self.evil_bot)
 	else:
-		$Sprite.set_texture(self.good_bot)
+		self.create_bot_with_label(self.good_bot)
+
+	$Sprite/Label.text = \
+		"[" + self._data['ipaddr']  + "]" + "\n" + \
+		"[" + self._data['hwaddr']  + "]" + "\n" + \
+		"[" + self._data['dv_name'] + "]"
 	return self
+
+func create_bot_with_label(bot):
+	$Sprite.set_texture(bot)
 
 func get_data():
 	return self._data
